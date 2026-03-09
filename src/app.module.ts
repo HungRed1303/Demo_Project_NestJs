@@ -6,7 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
-import { UserModule } from './user/user.module';
+import { UsersModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';  // ← import
 
 @Module({
   imports: [
@@ -35,7 +36,10 @@ import { UserModule } from './user/user.module';
         synchronize: true,
       }),
       inject: [ConfigService],
-    }), BooksModule, UserModule],
+    }), 
+    BooksModule, 
+    UsersModule,
+    AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

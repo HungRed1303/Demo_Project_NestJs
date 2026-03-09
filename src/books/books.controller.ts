@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Patch, Delete, Put } from '@nestjs/common'
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UseGuards, Request } from '@nestjs/common';
 
 @ApiTags('books')
 @Controller('books')
@@ -27,6 +28,7 @@ export class BooksController {
     @ApiOperation({ summary: 'Tạo mới một cuốn sách' })
     @ApiResponse({ status: 201, description: 'Cuốn sách đã được tạo.' })
     @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ.' })
+    @UseGuards(JwtAuthGuard)  // Chỉ người dùng đã đăng nhập mới được tạo sách
     @Post()
     create(@Body() dto: CreateBookDto) {
         return this.booksService.create(dto);
@@ -35,6 +37,7 @@ export class BooksController {
     @ApiOperation({ summary: 'Cập nhật thông tin một cuốn sách' })
     @ApiResponse({ status: 200, description: 'Cuốn sách đã được cập nhật.' })
     @ApiResponse({ status: 404, description: 'Không tìm thấy sách.' })
+    @UseGuards(JwtAuthGuard)  // Chỉ người dùng đã đăng nhập mới được cập nhật sách
     @Patch(':id')
     update(id: number, @Body() dto: Partial<CreateBookDto>) {
         return this.booksService.update(id, dto);
@@ -43,6 +46,7 @@ export class BooksController {
     @ApiOperation({ summary: 'Xóa một cuốn sách' })
     @ApiResponse({ status: 200, description: 'Cuốn sách đã được xóa.' })
     @ApiResponse({ status: 404, description: 'Không tìm thấy sách.' })
+    @UseGuards(JwtAuthGuard)  // Chỉ người dùng đã đăng nhập mới được xóa sách
     @Delete(':id')
     remove(id: number) {
         return this.booksService.remove(id);
