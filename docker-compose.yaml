@@ -1,0 +1,43 @@
+# docker-compose.yaml — đơn giản hơn nhiều
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: book-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: bookdb
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: book-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+  app:
+    build: .
+    container_name: book-app
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env          # đọc .env như bình thường
+    environment:
+      DB_HOST: db     # override localhost → db
+      REDIS_HOST: redis
+    depends_on:
+      db:
+        condition: service_healthy  # chờ DB sẵn sàng
+volumes:
+  postgres_data:
+  redis_data:
