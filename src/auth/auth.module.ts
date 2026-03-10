@@ -7,10 +7,15 @@ import { JwtStrategy } from './jwt.strategy';
 import { UsersModule } from '../user/user.module';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { HASH_SERVICE } from './constants/auth.constants';
+import { BcryptService } from './hash/services/bcrypt.service';
+import { HashModule } from './hash/hash.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([RefreshToken]),
     UsersModule,
+    HashModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -20,6 +25,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers:
+    [
+      AuthService,
+      JwtStrategy,
+    ],
 })
-export class AuthModule {}
+export class AuthModule { }

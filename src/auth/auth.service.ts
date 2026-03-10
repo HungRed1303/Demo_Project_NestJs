@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
@@ -6,6 +6,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { HASH_SERVICE } from './constants/auth.constants';
+import type { IHashService } from './hash/interfaces/hash.interface';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +15,9 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+
+    @Inject(HASH_SERVICE)
+    private hashService: IHashService,
 
     @InjectRepository(RefreshToken)
     private refreshTokenRepo: Repository<RefreshToken>,
@@ -27,7 +32,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
     if (!user) throw new UnauthorizedException('Email không tồn tại');
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await this.hashService.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException('Sai mật khẩu');
 
     return this.generateTokens(user);
@@ -43,7 +48,7 @@ export class AuthService {
     if (!saved) throw new UnauthorizedException('Refresh token không hợp lệ');
 
     // 2. Kiểm tra token có khớp với hash không
-    const isMatch = await bcrypt.compare(token, saved.token);
+    const isMatch = await this.hashService.compare(token, saved.token);
     if (!isMatch) throw new UnauthorizedException('Refresh token không hợp lệ');
 
     // 3. Kiểm tra hết hạn chưa
@@ -83,7 +88,7 @@ export class AuthService {
 
     // Hash refresh token trước khi lưu vào DB
     const hashed = await bcrypt.hash(refreshToken, 10);
-    
+
     // Lưu vào DB
     await this.refreshTokenRepo.save({
       token: hashed,
