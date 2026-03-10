@@ -1,3 +1,4 @@
+import { Role } from 'src/auth/enums/role.enum';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('users')
@@ -11,8 +12,8 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: 'user' })
-  role: string;      // 'user' | 'admin'
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
 
   @CreateDateColumn()
   createdAt: Date;

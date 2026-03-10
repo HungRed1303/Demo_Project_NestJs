@@ -24,7 +24,7 @@ import { AuthModule } from './auth/auth.module';  // ← import
       }),
     }),
 
-    TypeOrmModule.forRootAsync({
+    TypeOrmModule.forRootAsync({  
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get('DB_HOST'),
