@@ -1,26 +1,32 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable, ConflictException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
+import { Inject } from '@nestjs/common';
+import { HASH_SERVICE } from '../auth/constants/auth.constants';
+import type { IHashService } from '../auth/hash/interfaces/hash.interface';
 
 @Injectable()
-export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+
+    @Inject(HASH_SERVICE)
+    private hashService: IHashService,
+  ) {}
+
+  async create(email: string, password: string) {
+    const exists = await this.userRepo.findOneBy({ email });
+    if (exists) throw new ConflictException('Email đã tồn tại');
+
+    const hashed = await this.hashService.hash(password);  // hash password
+    const user = this.userRepo.create({ email, password: hashed });
+    return this.userRepo.save(user);
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  findByEmail(email: string) {
+    return this.userRepo.findOneBy({ email });
   }
 }

@@ -13,7 +13,7 @@ export class BooksService {
         @InjectRepository(Book)
         private bookRepo: Repository<Book>,
 
-        @Inject(CACHE_MANAGER) 
+        @Inject(CACHE_MANAGER)
         private cacheManager: Cache,
     ) { }
 
@@ -21,8 +21,8 @@ export class BooksService {
         // 1. Kiểm tra cache trước
         const cached = await this.cacheManager.get('books:all');
         if (cached) {
-        console.log('Cache HIT ✓');
-        return cached;
+            console.log('Cache HIT ✓');
+            return cached;
         }
 
         // 2. Không có cache → query DB
@@ -36,9 +36,12 @@ export class BooksService {
 
     async findOne(id: number) {
         const cacheKey = `books:${id}`;
+
+        // Kiểm tra rõ ràng hơn thay vì chỉ if (cached)
         const cached = await this.cacheManager.get(cacheKey);
-        if (cached) {
-            console.log(`Cache HIT ✓ for book #${id}`);
+        console.log(`Key: ${cacheKey}, Value:`, cached);
+        if (cached !== null && cached !== undefined) {
+            console.log(`Cache HIT ✓ for book #${+id}`);
             return cached;
         }
 

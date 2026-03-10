@@ -1,9 +1,17 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
-
+import { UsersService } from './user.service';
+import { UsersController } from './user.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { HASH_SERVICE } from '../auth/constants/auth.constants';
+import { BcryptService } from '../auth/hash/services/bcrypt.service';
+import { HashModule } from 'src/auth/hash/hash.module';
 @Module({
-  controllers: [UserController],
-  providers: [UserService],
+  imports: [TypeOrmModule.forFeature([User]), HashModule],
+  controllers: [UsersController],
+  providers: [
+    UsersService,
+  ],
+  exports: [UsersService],
 })
-export class UserModule {}
+export class UsersModule {}
