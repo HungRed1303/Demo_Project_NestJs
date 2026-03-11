@@ -10,11 +10,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { HASH_SERVICE } from './constants/auth.constants';
 import { BcryptService } from './hash/services/bcrypt.service';
 import { HashModule } from './hash/hash.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([RefreshToken]),
     UsersModule,
+    MailModule,
     HashModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

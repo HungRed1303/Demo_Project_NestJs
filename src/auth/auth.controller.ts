@@ -1,31 +1,63 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, UseGuards, UnauthorizedException } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
+  // ─── Helper ──────────────────────────────────────────
+  private setRefreshTokenCookie(res: Response, token: string) {
+    res.cookie('refresh_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+  }
+
+  private handleAuthResponse(res: Response, tokens: { access_token: string; refresh_token: string }) {
+    this.setRefreshTokenCookie(res, tokens.refresh_token);
+    return { access_token: tokens.access_token };
+  }
+
+  // ─── Routes ──────────────────────────────────────────
   @Post('register')
-  register(@Body() body: RegisterDto) {
+  async register(@Body() body: RegisterDto) {
     return this.authService.register(body.email, body.password);
+    // không trả token ở đây vì cần verify OTP trước
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(@Body() body: VerifyOtpDto, @Res({ passthrough: true }) res: Response) {
+    const tokens = await this.authService.verifyOtp(body.email, body.otp);
+    return this.handleAuthResponse(res, tokens);
   }
 
   @Post('login')
-  login(@Body() body: LoginDto) {
-    return this.authService.login(body.email, body.password);
+  async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
+    const tokens = await this.authService.login(body.email, body.password);
+    return this.handleAuthResponse(res, tokens);
   }
 
   @Post('refresh')
-  refresh(@Body('refresh_token') token: string) {
-    return this.authService.refresh(token);
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const token = req.cookies['refresh_token'];
+    if (!token) throw new UnauthorizedException('Không có refresh token');
+    const tokens = await this.authService.refresh(token);
+    return this.handleAuthResponse(res, tokens);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Body('refresh_token') token: string) {
-    return this.authService.logout(token);
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const token = req.cookies['refresh_token'];
+    await this.authService.logout(token);
+    res.clearCookie('refresh_token');
+    return { message: 'Đăng xuất thành công' };
   }
 }

@@ -8,6 +8,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { UsersModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';  // ← import
+import { MailModule } from './mail/mail.module';  // ← import
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AuthModule } from './auth/auth.module';  // ← import
     }), 
     BooksModule, 
     UsersModule,
+    MailModule,
     AuthModule],
   controllers: [AppController],
   providers: [AppService],

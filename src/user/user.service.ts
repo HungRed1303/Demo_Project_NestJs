@@ -15,7 +15,7 @@ export class UsersService {
 
     @Inject(HASH_SERVICE)
     private hashService: IHashService,
-  ) {}
+  ) { }
 
   async create(email: string, password: string) {
     const exists = await this.userRepo.findOneBy({ email });
@@ -28,5 +28,13 @@ export class UsersService {
 
   findByEmail(email: string) {
     return this.userRepo.findOneBy({ email });
+  }
+
+  // Thêm method này vào cuối
+  async markVerified(email: string) {
+    const user = await this.findByEmail(email);
+    if (!user) throw new ConflictException('User not found');
+    user.isVerified = true;
+    return this.userRepo.save(user);
   }
 }
