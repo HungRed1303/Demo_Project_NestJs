@@ -34,7 +34,7 @@ import { MailModule } from './mail/mail.module';  // ← import
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: false,  // không tự động sync để tránh mất dữ liệu, dùng migrations thay thế
       }),
       inject: [ConfigService],
     }), 
