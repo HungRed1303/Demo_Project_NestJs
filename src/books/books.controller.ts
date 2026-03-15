@@ -7,6 +7,7 @@ import { UseGuards, Request } from '@nestjs/common';
 import {Role} from '../auth/enums/role.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('books')
 @Controller('books')
@@ -15,6 +16,7 @@ export class BooksController {
 
     @ApiOperation({ summary: 'Lấy danh sách sách' })
     @ApiResponse({ status: 200, description: 'Danh sách sách đã được trả về.' })
+    @Public()  // Cho phép truy cập công khai mà không cần token
     @Get()
     findAll() {
         return this.booksService.findAll();
@@ -23,6 +25,7 @@ export class BooksController {
     @ApiOperation({ summary: 'Lấy thông tin một cuốn sách' })
     @ApiResponse({ status: 200, description: 'Thông tin sách đã được trả về.' })
     @ApiResponse({ status: 404, description: 'Không tìm thấy sách.' })
+    @Public()  // Cho phép truy cập công khai mà không cần token
     @Get(':id')
     findOne(@Param('id') id: number) {
         return this.booksService.findOne(id);
@@ -31,7 +34,6 @@ export class BooksController {
     @ApiOperation({ summary: 'Tạo mới một cuốn sách' })
     @ApiResponse({ status: 201, description: 'Cuốn sách đã được tạo.' })
     @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ.' })
-    @UseGuards(JwtAuthGuard)  // Chỉ người dùng đã đăng nhập mới được tạo sách
     @Post()
     create(@Body() dto: CreateBookDto) {
         return this.booksService.create(dto);
@@ -40,7 +42,6 @@ export class BooksController {
     @ApiOperation({ summary: 'Cập nhật thông tin một cuốn sách' })
     @ApiResponse({ status: 200, description: 'Cuốn sách đã được cập nhật.' })
     @ApiResponse({ status: 404, description: 'Không tìm thấy sách.' })
-    @UseGuards(JwtAuthGuard)  // Chỉ người dùng đã đăng nhập mới được cập nhật sách
     @Patch(':id')
     update(@Param('id') id: number, @Body() dto: Partial<CreateBookDto>) {
         return this.booksService.update(id, dto);
@@ -49,7 +50,7 @@ export class BooksController {
     @ApiOperation({ summary: 'Xóa một cuốn sách' })
     @ApiResponse({ status: 200, description: 'Cuốn sách đã được xóa.' })
     @ApiResponse({ status: 404, description: 'Không tìm thấy sách.' })
-    @UseGuards(JwtAuthGuard, RolesGuard)  // Chỉ người dùng đã đăng nhập và có vai trò admin mới được xóa sách
+    @UseGuards(RolesGuard)  // Chỉ người dùng đã đăng nhập và có vai trò admin mới được xóa sách
     @Roles(Role.ADMIN)  // Chỉ người dùng có vai trò admin mới được xóa sách
     @Delete(':id')
     remove(@Param('id') id: number) {

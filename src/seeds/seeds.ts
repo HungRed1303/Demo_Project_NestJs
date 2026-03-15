@@ -31,6 +31,7 @@ async function seed() {
       role: Role.ADMIN,
       isVerified: true,
     });
+    await userRepo.save(admin);
     console.log('✓ Admin created');
   } else {
     console.log('Admin already exists, skipping...');

@@ -6,6 +6,7 @@ import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ResendOtpDto } from './dto/resend-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -27,24 +28,28 @@ export class AuthController {
   }
 
   // ─── Routes ──────────────────────────────────────────
+  @Public()
   @Post('register')
   async register(@Body() body: RegisterDto) {
     return this.authService.register(body.email, body.password);
     // không trả token ở đây vì cần verify OTP trước
   }
 
+  @Public()
   @Post('verify-otp')
   async verifyOtp(@Body() body: VerifyOtpDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.verifyOtp(body.email, body.otp);
     return this.handleAuthResponse(res, tokens);
   }
 
+  @Public()
   @Post('login')
   async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.login(body.email, body.password);
     return this.handleAuthResponse(res, tokens);
   }
 
+  @Public()
   @Post('refresh')
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies['refresh_token'];
@@ -53,7 +58,6 @@ export class AuthController {
     return this.handleAuthResponse(res, tokens);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const user = (req as any).user;        // do JwtStrategy gắn vào
@@ -62,6 +66,7 @@ export class AuthController {
     return { message: 'Đăng xuất thành công' };
   }
 
+  @Public()
   @Post('resend-otp')
   async resendOtp(@Body() body: ResendOtpDto) {
     return this.authService.resendOtp(body.email);
