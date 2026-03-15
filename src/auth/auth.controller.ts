@@ -4,11 +4,12 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   // ─── Helper ──────────────────────────────────────────
   private setRefreshTokenCookie(res: Response, token: string) {
@@ -55,9 +56,14 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const token = req.cookies['refresh_token'];
-    await this.authService.logout(token);
+    const user = (req as any).user;        // do JwtStrategy gắn vào
+    await this.authService.logout(user.id);
     res.clearCookie('refresh_token');
     return { message: 'Đăng xuất thành công' };
+  }
+
+  @Post('resend-otp')
+  async resendOtp(@Body() body: ResendOtpDto) {
+    return this.authService.resendOtp(body.email);
   }
 }
