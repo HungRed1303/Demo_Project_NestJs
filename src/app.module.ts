@@ -9,6 +9,7 @@ import { redisStore } from 'cache-manager-redis-yet';
 import { UsersModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';  // ← import
 import { MailModule } from './mail/mail.module';  // ← import
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -43,6 +44,11 @@ import { MailModule } from './mail/mail.module';  // ← import
     MailModule,
     AuthModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    {
+      provide: 'APP_GUARD',
+      useClass: JwtAuthGuard,  // áp dụng guard toàn cục
+    }
+  ],
 })
 export class AppModule { }

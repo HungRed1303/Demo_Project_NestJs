@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { HASH_SERVICE } from '../auth/constants/auth.constants';
 import { BcryptService } from '../auth/hash/services/bcrypt.service';
-import { HashModule } from 'src/auth/hash/hash.module';
+import { HashModule } from '../auth/hash/hash.module';
 @Module({
   imports: [TypeOrmModule.forFeature([User]), HashModule],
   controllers: [UsersController],
