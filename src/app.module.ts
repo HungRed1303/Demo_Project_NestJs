@@ -10,6 +10,7 @@ import { UsersModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';  // ← import
 import { MailModule } from './mail/mail.module';  // ← import
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
