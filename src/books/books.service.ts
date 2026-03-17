@@ -1,80 +1,63 @@
-// books.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Book } from './entities/book.entity';
-import { CreateBookDto } from './dto/create-book.dto';
+// src/books/books.service.ts
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject } from '@nestjs/common';
-
+import { CreateBookDto } from './dto/create-book.dto';
+import type { IBookRepository } from './repositories/book.repository.interface';
+import { BOOK_REPOSITORY } from './repositories/book.repository.interface';
 @Injectable()
 export class BooksService {
-    constructor(
-        @InjectRepository(Book)
-        private bookRepo: Repository<Book>,
+  constructor(
+    @Inject(BOOK_REPOSITORY)
+    private readonly bookRepo: IBookRepository,  // ← interface, không biết TypeORM
 
-        @Inject(CACHE_MANAGER)
-        private cacheManager: Cache,
-    ) { }
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
+  ) {}
 
-    async findAll() {
-        // 1. Kiểm tra cache trước
-        const cached = await this.cacheManager.get('books:all');
-        if (cached) {
-            console.log('Cache HIT ✓');
-            return cached;
-        }
+  async findAll() {
+    const cached = await this.cacheManager.get('books:all');
+    if (cached) return cached;
 
-        // 2. Không có cache → query DB
-        console.log('Cache MISS → query DB');
-        const books = await this.bookRepo.find();
+    const books = await this.bookRepo.findAll();
+    await this.cacheManager.set('books:all', books, 60000);
+    return books;
+  }
 
-        // 3. Lưu vào cache 60 giây
-        await this.cacheManager.set('books:all', books, 60000);
-        return books;
-    }
+  async findOne(id: number) {
+    const cacheKey = `books:${id}`;
+    const cached = await this.cacheManager.get(cacheKey);
+    if (cached) return cached;
 
-    async findOne(id: number) {
-        const cacheKey = `books:${id}`;
+    const book = await this.bookRepo.findById(id);
+    if (!book) throw new NotFoundException(`Không tìm thấy sách #${id}`);
 
-        // Kiểm tra rõ ràng hơn thay vì chỉ if (cached)
-        const cached = await this.cacheManager.get(cacheKey);
-        console.log(`Key: ${cacheKey}, Value:`, cached);
-        if (cached !== null && cached !== undefined) {
-            console.log(`Cache HIT ✓ for book #${+id}`);
-            return cached;
-        }
+    await this.cacheManager.set(cacheKey, book, 60000);
+    return book;
+  }
 
-        const book = await this.bookRepo.findOneBy({ id });
-        if (!book) throw new NotFoundException(`Không tìm thấy sách #${id}`);
+  async create(dto: CreateBookDto) {
+    const book = await this.bookRepo.create(dto);
+    await this.cacheManager.del('books:all');
+    return book;
+  }
 
-        await this.cacheManager.set(cacheKey, book, 60000);
-        return book;
-    }
+  async update(id: number, dto: Partial<CreateBookDto>) {
+    const book = await this.bookRepo.findById(id);
+    if (!book) throw new NotFoundException(`Không tìm thấy sách #${id}`);
 
-    async create(dto: CreateBookDto) {
-        const book = this.bookRepo.create(dto);
-        const saved = await this.bookRepo.save(book);  // tạo object
-        await this.cacheManager.del('books:all');  // xóa cache danh sách để cập nhật sau
-        return saved;          // lưu vào DB
-    }
+    const updated = await this.bookRepo.update(book, dto);
+    await this.cacheManager.del(`books:${id}`);
+    await this.cacheManager.del('books:all');
+    return updated;
+  }
 
-    async update(id: number, dto: Partial<CreateBookDto>) {
-        const book = await this.findOne(id);
-        Object.assign(book, dto);
-        const updated = await this.bookRepo.save(book);  // cập nhật DB
-        await this.cacheManager.del(`books:${id}`);
-        await this.cacheManager.del('books:all');  // xóa cache danh sách để cập nhật sau
-        return updated;
-    }
+  async remove(id: number) {
+    const book = await this.bookRepo.findById(id);
+    if (!book) throw new NotFoundException(`Không tìm thấy sách #${id}`);
 
-    async remove(id: number) {
-        const book = await this.findOne(id);
-        await this.bookRepo.softRemove(book);      // tự set deletedAt = now()
-
-        await this.cacheManager.del(`books:${id}`);
-        await this.cacheManager.del('books:all');  // xóa cache danh sách để cập nhật sau
-
-        return { message: `Đã xóa sách #${id}` };
-    }
+    await this.bookRepo.softDelete(book);
+    await this.cacheManager.del(`books:${id}`);
+    await this.cacheManager.del('books:all');
+    return { message: `Đã xóa sách #${id}` };
+  }
 }

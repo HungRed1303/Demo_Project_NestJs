@@ -1,63 +1,61 @@
 // src/user/user.service.ts
-import { Injectable, ConflictException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, ConflictException, Inject, NotFoundException } from '@nestjs/common';
 import { User } from './entities/user.entity';
-import { Inject } from '@nestjs/common';
 import { HASH_SERVICE } from '../auth/constants/auth.constants';
 import type { IHashService } from '../auth/hash/interfaces/hash.interface';
+import { USER_REPOSITORY } from './repositories/user.repository.interface'; 
+import type {IUserRepository } from './repositories/user.repository.interface';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private userRepo: Repository<User>,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: IUserRepository,  // ← interface
 
     @Inject(HASH_SERVICE)
     private hashService: IHashService,
   ) {}
 
-  async create(email: string, password: string) {
-    const exists = await this.userRepo.findOneBy({ email });
+  async create(email: string, password: string): Promise<User> {
+    const exists = await this.userRepo.findByEmail(email);
 
     if (exists) {
       if (exists.isVerified) {
         throw new ConflictException('Email đã được đăng ký');
       }
-      // Chưa verify → cho đăng ký lại, cập nhật password mới
+      // Chưa verify → update password mới
       exists.password = await this.hashService.hash(password);
       return this.userRepo.save(exists);
     }
 
     const hashed = await this.hashService.hash(password);
-    const user = this.userRepo.create({ email, password: hashed });
-    return this.userRepo.save(user);
+    return this.userRepo.create(email, hashed);
   }
 
-  findByEmail(email: string) {
-    return this.userRepo.findOneBy({ email });
+  findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findByEmail(email);
   }
 
-  findById(id: number) {
-    return this.userRepo.findOneBy({ id });
+  findById(id: number): Promise<User | null> {
+    return this.userRepo.findById(id);
   }
 
-  async markVerified(email: string) {
-    const user = await this.findByEmail(email);
-    if (!user) throw new ConflictException('User not found');
+  async markVerified(email: string): Promise<User> {
+    const user = await this.userRepo.findByEmail(email);
+    if (!user) throw new NotFoundException('User not found');
     user.isVerified = true;
     return this.userRepo.save(user);
   }
 
-  async saveRefreshToken(userId: number, hashedToken: string) {
-    await this.userRepo.update(userId, {
+  async saveRefreshToken(userId: number, hashedToken: string): Promise<void> {
+    await this.userRepo.updateById(userId, {
       refreshToken: hashedToken,
       refreshTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
   }
 
-  async clearRefreshToken(userId: number) {
-    await this.userRepo.update(userId, {
+  async clearRefreshToken(userId: number): Promise<void> {
+    await this.userRepo.updateById(userId, {
       refreshToken: null,
       refreshTokenExpiresAt: null,
     });

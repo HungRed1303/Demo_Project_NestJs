@@ -9,7 +9,7 @@ import { Argon2Service } from "./services/argon2.service";
   providers: [
     {
       provide: HASH_SERVICE,
-      useClass: Argon2Service,  // ← đổi thành Argon2Service
+      useClass: BcryptService,  // ← đổi thành Argon2Service
     },
   ],
   exports: [HASH_SERVICE],  // ← export để module khác dùng
