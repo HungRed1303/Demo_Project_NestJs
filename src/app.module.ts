@@ -11,10 +11,18 @@ import { AuthModule } from './auth/auth.module';  // ← import
 import { MailModule } from './mail/mail.module';  // ← import
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { validateEnv } from './config/env.validation';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+
+    ConfigModule.forRoot({
+      isGlobal: true,
+      // Load đúng file theo NODE_ENV
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      // Validate qua zod, NestJS gọi hàm này trong lifecycle
+      validate: validateEnv,
+    }),
 
     CacheModule.registerAsync({
       isGlobal: true,  // dùng được ở mọi nơi

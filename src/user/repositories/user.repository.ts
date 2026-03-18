@@ -1,35 +1,29 @@
-// src/user/repositories/user.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { IUserRepository } from './user.repository.interface';
+import type { IUserRepository } from './user.repository.interface';
+import { BaseRepository } from '../../common/repositories/base.repository';
 
 @Injectable()
-export class UserRepository implements IUserRepository {
+export class UserRepository
+  extends BaseRepository<User>
+  implements IUserRepository
+{
   constructor(
     @InjectRepository(User)
-    private readonly repo: Repository<User>,
-  ) {}
-
-  findByEmail(email: string): Promise<User | null> {
-    return this.repo.findOneBy({ email });
+    repo: Repository<User>,
+  ) {
+    super(repo);  // truyền repo lên BaseRepository
   }
 
-  findById(id: number): Promise<User | null> {
-    return this.repo.findOneBy({ id });
+  // chỉ viết method đặc thù
+  findByEmail(email: string): Promise<User | null> {
+    return this.repo.findOneBy({ email });
   }
 
   async create(email: string, hashedPassword: string): Promise<User> {
     const user = this.repo.create({ email, password: hashedPassword });
     return this.repo.save(user);
-  }
-
-  save(user: User): Promise<User> {
-    return this.repo.save(user);
-  }
-
-  async updateById(id: number, data: Partial<User>): Promise<void> {
-    await this.repo.update(id, data);
   }
 }
