@@ -6,18 +6,25 @@ import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ResendOtpDto } from './dto/resend-otp.dto';
 import { Public } from './decorators/public.decorator';
-
+import { parseDurationToMs } from './../common/utils/parse-duration';
+import { ConfigService } from '@nestjs/config';
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService
+  ) { }
 
   // ─── Helper ──────────────────────────────────────────
   private setRefreshTokenCookie(res: Response, token: string) {
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
+    const expiresIn = this.configService.get<string>('REFRESH_TOKEN_EXPIRES_IN') || '7d';
+
     res.cookie('refresh_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: parseDurationToMs(expiresIn), // '7d' → 604800000
     });
   }
 
