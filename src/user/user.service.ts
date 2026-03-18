@@ -48,14 +48,14 @@ export class UsersService {
   }
 
   async saveRefreshToken(userId: number, hashedToken: string): Promise<void> {
-    await this.userRepo.updateById(userId, {
+    await this.userRepo.update(userId, {
       refreshToken: hashedToken,
       refreshTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
   }
 
   async clearRefreshToken(userId: number): Promise<void> {
-    await this.userRepo.updateById(userId, {
+    await this.userRepo.update(userId, {
       refreshToken: null,
       refreshTokenExpiresAt: null,
     });

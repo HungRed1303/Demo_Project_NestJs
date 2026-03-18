@@ -1,4 +1,4 @@
-# docker-compose.yaml — đơn giản hơn nhiều
+# docker-compose.yaml
 version: '3.8'
 
 services:
@@ -41,15 +41,17 @@ services:
     ports:
       - '3000:3000'
     env_file:
-      - .env          # đọc .env như bình thường
+      - .env.${NODE_ENV:-development}   # ← đọc đúng file theo NODE_ENV
     environment:
-      DB_HOST: db     # override localhost → db
+      NODE_ENV: ${NODE_ENV:-development} # ← truyền NODE_ENV vào container
+      DB_HOST: db
       REDIS_HOST: redis
     depends_on:
       db:
-        condition: service_healthy  # chờ DB sẵn sàng
+        condition: service_healthy
       redis:
-        condition: service_healthy  # chờ Redis sẵn sàng
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:
