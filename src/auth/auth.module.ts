@@ -2,9 +2,9 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { JwtStrategy } from './jwt.strategy';
+import { AuthService } from './application/auth.service';
+import { AuthController } from './presentation/auth.controller';
+import { JwtStrategy } from './application/jwt.strategy';
 import { UsersModule } from '../user/user.module';
 import { HashModule } from './hash/hash.module';
 import { MailModule } from '../mail/mail.module';

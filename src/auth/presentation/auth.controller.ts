@@ -1,12 +1,12 @@
 import { Controller, Post, Body, Req, Res, UseGuards, UnauthorizedException } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { ResendOtpDto } from './dto/resend-otp.dto';
-import { Public } from './decorators/public.decorator';
-import { parseDurationToMs } from './../common/utils/parse-duration';
+import { AuthService } from '../application/auth.service';
+import { RegisterDto } from '../dto/register.dto';
+import { LoginDto } from '../dto/login.dto';
+import { VerifyOtpDto } from '../dto/verify-otp.dto';
+import { ResendOtpDto } from '../dto/resend-otp.dto';
+import { Public } from '../decorators/public.decorator';
+import { parseDurationToMs } from '../../shared/utils/parse-duration';
 import { ConfigService } from '@nestjs/config';
 @Controller('auth')
 export class AuthController {
@@ -61,6 +61,7 @@ export class AuthController {
     const token = req.cookies['refresh_token'];
     if (!token) throw new UnauthorizedException('Không có refresh token');
     const tokens = await this.authService.refresh(token);
+    console.log('TOKEN BACKEND NHẬN:', token);
     return this.handleAuthResponse(res, tokens);
   }
 

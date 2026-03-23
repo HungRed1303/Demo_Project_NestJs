@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from './mail.service';
+import { MAIL_SERVICE } from './application/mail.service.interface';
+import { MailServiceImpl } from './infrastructure/mail.service';
 
 @Module({
   imports: [
@@ -23,7 +24,12 @@ import { MailService } from './mail.service';
       }),
     }),
   ],
-  providers: [MailService],
-  exports: [MailService],  // ← export để AuthModule dùng
+  providers: [
+    {
+      provide: MAIL_SERVICE,
+      useClass: MailServiceImpl,
+    },
+  ],
+  exports: [MAIL_SERVICE], // Export token này ra để module khác xài
 })
 export class MailModule {}

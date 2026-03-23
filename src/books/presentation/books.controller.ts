@@ -1,13 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Delete, Put , Param} from '@nestjs/common';
-import { BooksService } from './books.service';
-import { CreateBookDto } from './dto/create-book.dto';
+import { Controller, Get, Post, Body, Patch, Delete, Param, UseGuards } from '@nestjs/common';
+import { BooksService } from '../application/books.service';
+import { CreateBookDto } from '../dto/create-book.dto'; // Thư mục DTO để tùy ý
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UseGuards, Request } from '@nestjs/common';
-import {Role} from '../auth/enums/role.enum';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Public } from '../auth/decorators/public.decorator';
+import { Role } from '../../auth/enums/role.enum';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Public } from '../../auth/decorators/public.decorator';
 
 @ApiTags('books')
 @Controller('books')

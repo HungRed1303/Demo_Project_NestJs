@@ -9,10 +9,11 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
-import { UsersService } from '../user/user.service';
-import { MailService } from '../mail/mail.service';
-import { HASH_SERVICE } from './constants/auth.constants';
-import type { IHashService } from './hash/interfaces/hash.interface';
+import { UsersService } from '../../user/application/user.service';
+import { MAIL_SERVICE } from '../../mail/application/mail.service.interface';
+import type { IMailService } from '../../mail/application/mail.service.interface';
+import { HASH_SERVICE } from '../constants/auth.constants';
+import type { IHashService } from '../hash/interfaces/hash.interface';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +21,9 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private mailService: MailService,
+    
+    @Inject(MAIL_SERVICE)
+    private mailService: IMailService,
 
     @Inject(HASH_SERVICE)
     private hashService: IHashService,
@@ -91,7 +94,9 @@ export class AuthService {
     if (!isMatch) {
       // Token không khớp → có thể bị reuse sau khi đã rotate
       // Xóa luôn token hiện tại, buộc đăng nhập lại
-      await this.usersService.clearRefreshToken(user.id);
+      if (user.id) {
+        await this.usersService.clearRefreshToken(user.id);
+      }
       throw new UnauthorizedException(
         'Phát hiện token bất thường. Vui lòng đăng nhập lại.',
       );
@@ -99,7 +104,9 @@ export class AuthService {
 
     // 4. Kiểm tra hết hạn trong DB (double-check)
     if (!user.refreshTokenExpiresAt || user.refreshTokenExpiresAt < new Date()) {
-      await this.usersService.clearRefreshToken(user.id);
+      if (user.id) {
+        await this.usersService.clearRefreshToken(user.id);
+      }
       throw new UnauthorizedException('Refresh token đã hết hạn');
     }
 

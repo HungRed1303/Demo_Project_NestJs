@@ -1,0 +1,21 @@
+import { Book } from '../domain/book.entity';
+import { BookOrmEntity } from './book.orm-entity';
+
+export class BookMapper {
+  static toDomain(raw: BookOrmEntity): Book {
+    return new Book({
+      ...raw,
+      price: typeof raw.price === 'string' ? parseFloat(raw.price) : raw.price,
+    });
+  }
+  static toOrm(domain: Book): BookOrmEntity {
+    const orm = new BookOrmEntity();
+    if (domain.id) orm.id = domain.id;
+    orm.title = domain.title;
+    orm.author = domain.author;
+    orm.price = domain.price;
+    orm.year = domain.year;
+    orm.deletedAt = domain.deletedAt;
+    return orm;
+  }
+}

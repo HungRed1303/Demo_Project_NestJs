@@ -1,9 +1,8 @@
-// src/user/entities/user.entity.ts
-import { Role } from '../../auth/enums/role.enum';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Role } from '../../auth/enums/role.enum';
 
 @Entity('users')
-export class User {
+export class UserOrmEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

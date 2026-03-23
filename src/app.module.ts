@@ -55,7 +55,7 @@ import { validateEnv } from './config/env.validation';
   controllers: [AppController],
   providers: [AppService,
     {
-      provide: 'APP_GUARD',
+      provide: APP_GUARD,
       useClass: JwtAuthGuard,  // áp dụng guard toàn cục
     }
   ],
