@@ -3,6 +3,9 @@ import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Book } from '../domain/book.entity';
 import type { IBookRepository } from '../domain/book.repository.interface';
 import { BOOK_REPOSITORY } from '../domain/book.repository.interface';
+import { CreateBookDto } from '../presentation/dto/create-book.dto';
+import { UpdateBookDto } from '../presentation/dto/update-book.dto';
+
 @Injectable()
 export class BooksService {
   constructor(
@@ -28,14 +31,14 @@ export class BooksService {
     return book;
   }
 
-  async create(dto: any) {
+  async create(dto: CreateBookDto) {
     const newBook = new Book(dto);
     const savedBook = await this.bookRepo.save(newBook);
     await this.cacheManager.del('books:all');
     return savedBook;
   }
 
-  async update(id: number, dto: any) {
+  async update(id: number, dto: UpdateBookDto) {
     const book = await this.bookRepo.findById(id);
     if (!book) throw new NotFoundException(`Không tìm thấy sách #${id}`);
     book.updateInfo(dto);
