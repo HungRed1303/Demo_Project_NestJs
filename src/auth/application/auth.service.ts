@@ -12,8 +12,8 @@ import type { Cache } from 'cache-manager';
 import { UsersService } from '../../user/application/user.service';
 import { MAIL_SERVICE } from '../../mail/application/mail.service.interface';
 import type { IMailService } from '../../mail/application/mail.service.interface';
-import { HASH_SERVICE } from '../constants/auth.constants';
-import type { IHashService } from '../hash/interfaces/hash.interface';
+import { HASH_SERVICE } from '../presentation/constants/auth.constants';
+import type { IHashService } from '../domain/ports/hash.service.interface.ts';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +21,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-    
+
     @Inject(MAIL_SERVICE)
     private mailService: IMailService,
 

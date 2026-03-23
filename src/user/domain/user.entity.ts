@@ -1,4 +1,4 @@
-import { Role } from '../../auth/enums/role.enum';
+import { Role } from '../../auth/domain/enums/role.enum';
 
 export class User {
   private _id?: number;

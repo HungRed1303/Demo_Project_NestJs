@@ -9,7 +9,7 @@ import { redisStore } from 'cache-manager-redis-yet';
 import { UsersModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';  // ← import
 import { MailModule } from './mail/mail.module';  // ← import
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './auth/presentation/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { validateEnv } from './config/env.validation';
 

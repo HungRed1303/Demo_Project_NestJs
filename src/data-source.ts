@@ -10,6 +10,9 @@ export default new DataSource({
   password: process.env.DB_PASSWORD || '123456',
   database: process.env.DB_NAME || 'bookdb',
   // QUAN TRỌNG: Trỏ đúng vào các file ORM Entity trong cấu trúc DDD mới
-  entities: ['src/modules/**/infrastructure/persistence/*.orm-entity.ts'],
+  entities: [
+  'src/user/infrastructure/user.orm-entity.ts',
+  'src/books/infrastructure/book.orm-entity.ts',
+  ],
   migrations: ['src/migrations/*.ts'],
 });

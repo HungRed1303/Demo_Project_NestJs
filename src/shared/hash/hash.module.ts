@@ -1,9 +1,9 @@
 // hash.module.ts
 
 import { Module } from "@nestjs/common/decorators/modules/module.decorator";
-import { HASH_SERVICE } from "../constants/auth.constants";
-import { BcryptService } from "./services/bcrypt.service";
-import { Argon2Service } from "./services/argon2.service";
+import { HASH_SERVICE } from "../../auth/presentation/constants/auth.constants";
+import { BcryptService } from "../../auth/infrastructure/hash/bcrypt.service";
+import { Argon2Service } from "../../auth/infrastructure/hash/argon2.service";
 
 @Module({
   providers: [

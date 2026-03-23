@@ -3,7 +3,16 @@ import { UserOrmEntity } from './user.orm-entity';
 
 export class UserMapper {
   static toDomain(orm: UserOrmEntity): User {
-    return new User(orm);
+    return new User({
+      id: orm.id,
+      email: orm.email,
+      password: orm.password,
+      isVerified: orm.isVerified,
+      role: orm.role,
+      refreshToken: orm.refreshToken,
+      refreshTokenExpiresAt: orm.refreshTokenExpiresAt,
+      createdAt: orm.createdAt,
+    });
   }
   static toOrm(domain: User): UserOrmEntity {
     const orm = new UserOrmEntity();

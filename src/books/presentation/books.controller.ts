@@ -1,11 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Delete, Param, UseGuards } from '@nestjs/common';
 import { BooksService } from '../application/books.service';
-import { CreateBookDto } from '../dto/create-book.dto'; // Thư mục DTO để tùy ý
+import { CreateBookDto } from './dto/create-book.dto'; // Thư mục DTO để tùy ý
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { Role } from '../../auth/enums/role.enum';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Public } from '../../auth/decorators/public.decorator';
+import { Role } from '../../auth/domain/enums/role.enum';
+import { Roles } from '../../auth/presentation/decorators/roles.decorator';
+import { RolesGuard } from '../../auth/presentation/guards/roles.guard';
+import { Public } from '../../auth/presentation/decorators/public.decorator';
+import { ParseIntPipe } from '@nestjs/common';
 
 @ApiTags('books')
 @Controller('books')
@@ -25,7 +26,7 @@ export class BooksController {
     @ApiResponse({ status: 404, description: 'Không tìm thấy sách.' })
     @Public()  // Cho phép truy cập công khai mà không cần token
     @Get(':id')
-    findOne(@Param('id') id: number) {
+    findOne(@Param('id', ParseIntPipe) id: number) {
         return this.booksService.findOne(id);
     }
 
@@ -41,7 +42,7 @@ export class BooksController {
     @ApiResponse({ status: 200, description: 'Cuốn sách đã được cập nhật.' })
     @ApiResponse({ status: 404, description: 'Không tìm thấy sách.' })
     @Patch(':id')
-    update(@Param('id') id: number, @Body() dto: Partial<CreateBookDto>) {
+    update(@Param('id', ParseIntPipe) id: number, @Body() dto: Partial<CreateBookDto>) {
         return this.booksService.update(id, dto);
     }
 
@@ -51,7 +52,7 @@ export class BooksController {
     @UseGuards(RolesGuard)  // Chỉ người dùng đã đăng nhập và có vai trò admin mới được xóa sách
     @Roles(Role.ADMIN)  // Chỉ người dùng có vai trò admin mới được xóa sách
     @Delete(':id')
-    remove(@Param('id') id: number) {
+    remove(@Param('id', ParseIntPipe) id: number) {
         return this.booksService.remove(id);
     }
 

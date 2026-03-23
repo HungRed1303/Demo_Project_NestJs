@@ -1,7 +1,7 @@
 import { Injectable, ConflictException, Inject, NotFoundException } from '@nestjs/common';
 import { User } from '../domain/user.entity';
-import { HASH_SERVICE } from '../../auth/constants/auth.constants';
-import type { IHashService } from '../../auth/hash/interfaces/hash.interface';
+import { HASH_SERVICE } from '../../auth/presentation/constants/auth.constants';
+import type { IHashService } from '../../auth/domain/ports/hash.service.interface.ts';
 import { USER_REPOSITORY } from '../domain/user.repository.interface';
 import type { IUserRepository } from '../domain/user.repository.interface';
 

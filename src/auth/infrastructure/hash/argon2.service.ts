@@ -1,7 +1,7 @@
 // argon2.service.ts
 import * as argon2 from 'argon2';
 import { Injectable } from '@nestjs/common';
-import { IHashService } from '../interfaces/hash.interface';
+import type { IHashService } from '../../domain/ports/hash.service.interface.ts';
 
 @Injectable()
 export class Argon2Service implements IHashService {
