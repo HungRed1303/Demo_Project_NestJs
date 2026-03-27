@@ -1,12 +1,16 @@
 import { Controller, Get, Post, Body, Patch, Delete, Param, UseGuards } from '@nestjs/common';
 import { BooksService } from '../application/books.service';
-import { CreateBookDto } from './dto/create-book.dto'; // Thư mục DTO để tùy ý
+import { CreateBookCommand } from '../application/commands/create-book.command';
+import { UpdateBookCommand } from '../application/commands/update-book.command';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Role } from '../../auth/domain/enums/role.enum';
 import { Roles } from '../../auth/presentation/decorators/roles.decorator';
 import { RolesGuard } from '../../auth/presentation/guards/roles.guard';
 import { Public } from '../../auth/presentation/decorators/public.decorator';
 import { ParseIntPipe } from '@nestjs/common';
+import { BookRequestMapper } from './mappers/book-request.mapper';
 
 @ApiTags('books')
 @Controller('books')
@@ -34,8 +38,10 @@ export class BooksController {
     @ApiResponse({ status: 201, description: 'Cuốn sách đã được tạo.' })
     @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ.' })
     @Post()
-    create(@Body() dto: CreateBookDto) {
-        return this.booksService.create(dto);
+    create(@Body() dto: CreateBookDto)
+    {
+        const command = BookRequestMapper.toCreateCommand(dto);
+        return this.booksService.create(command);
     }
 
     @ApiOperation({ summary: 'Cập nhật thông tin một cuốn sách' })
@@ -43,7 +49,8 @@ export class BooksController {
     @ApiResponse({ status: 404, description: 'Không tìm thấy sách.' })
     @Patch(':id')
     update(@Param('id', ParseIntPipe) id: number, @Body() dto: Partial<CreateBookDto>) {
-        return this.booksService.update(id, dto);
+        const command = BookRequestMapper.toUpdateCommand(dto);
+        return this.booksService.update(id, command);
     }
 
     @ApiOperation({ summary: 'Xóa một cuốn sách' })
