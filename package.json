@@ -22,7 +22,7 @@
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
     "seed": "ts-node src/seeds/seeds.ts",
-    "docker:dev":  "cross-env NODE_ENV=development docker-compose up -d --build",
+    "docker:dev": "cross-env NODE_ENV=development docker-compose up -d --build",
     "docker:prod": "cross-env NODE_ENV=production docker-compose up -d --build"
   },
   "dependencies": {
@@ -31,6 +31,7 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/cqrs": "^11.0.3",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",

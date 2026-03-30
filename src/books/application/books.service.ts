@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Book } from '../domain/book.entity';
 import type { IBookRepository } from '../domain/book.repository.interface';
 import { BOOK_REPOSITORY } from '../domain/book.repository.interface';
-import { CreateBookCommand } from './commands/create-book.command';
-import { UpdateBookCommand } from './commands/update-book.command';
 
 @Injectable()
 export class BooksService {
@@ -29,23 +26,6 @@ export class BooksService {
     if (!book) throw new NotFoundException(`Không tìm thấy sách #${id}`);
     await this.cacheManager.set(cacheKey, book, 60000);
     return book;
-  }
-
-  async create(command : CreateBookCommand) {
-    const newBook = new Book(command);
-    const savedBook = await this.bookRepo.save(newBook);
-    await this.cacheManager.del('books:all');
-    return savedBook;
-  }
-
-  async update(id: number, command: UpdateBookCommand) {
-    const book = await this.bookRepo.findById(id);
-    if (!book) throw new NotFoundException(`Không tìm thấy sách #${id}`);
-    book.updateInfo(command);
-    const updated = await this.bookRepo.save(book);
-    await this.cacheManager.del(`books:${id}`);
-    await this.cacheManager.del('books:all');
-    return updated;
   }
 
   async remove(id: number) {
