@@ -1,8 +1,9 @@
+import { IMapper } from '../../core/base-ddd/infrastructure-base/base.mapper';
 import { Book } from '../domain/book.entity';
 import { BookOrmEntity } from './book.orm-entity';
 
-export class BookMapper {
-  static toDomain(raw: BookOrmEntity): Book {
+export class BookMapper implements IMapper<Book, BookOrmEntity> {
+  toDomain(raw: BookOrmEntity): Book {
     return new Book({
       id: raw.id,
       title: raw.title,
@@ -14,7 +15,7 @@ export class BookMapper {
     });
   }
 
-  static toOrm(domain: Book): BookOrmEntity {
+  toPersistence(domain: Book): BookOrmEntity {
     const orm = new BookOrmEntity();
     if (domain.id) orm.id = domain.id;
     orm.title = domain.title;
