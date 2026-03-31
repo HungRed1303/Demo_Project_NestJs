@@ -20,8 +20,10 @@ export abstract class BasePersistenceRepository<
     return record ? this.mapper.toDomain(record) : null;
   }
 
-  async save(entity: TDomainEntity): Promise<void> {
+// base.impl.repo.ts
+  async save(entity: TDomainEntity): Promise<TDomainEntity> {  // ← sửa void → TDomainEntity
     const data = this.mapper.toPersistence(entity);
-    await this.dbModel.save(data);
+    const saved = await this.dbModel.save(data);              // ← nhận return value
+    return this.mapper.toDomain(saved);                       // ← map ngược về domain
   }
 }
