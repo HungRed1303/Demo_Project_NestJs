@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
-import { User } from '../user/entities/user.entity';
-import { Book } from '../books/entities/book.entity';
+import { UserOrmEntity } from '../user/infrastructure/user.orm-entity';
+import { BookOrmEntity } from '../books/infrastructure/book.orm-entity';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
-import { Role } from '../auth/enums/role.enum';
+import { Role } from '../auth/domain/enums/role.enum';
 dotenv.config();
 
 async function seed() {
@@ -14,14 +14,14 @@ async function seed() {
     username: process.env.DB_USER || 'admin',
     password: process.env.DB_PASSWORD || '123456',
     database: process.env.DB_NAME || 'bookdb',
-    entities: [User, Book],
+    entities: [ UserOrmEntity, BookOrmEntity ],
   });
 
   await dataSource.initialize();
   console.log('Connected to DB ✓');
 
   // ─── Seed Admin ──────────────────────────────────────
-  const userRepo = dataSource.getRepository(User);
+  const userRepo = dataSource.getRepository(UserOrmEntity );
   const adminExists = await userRepo.findOneBy({ email: 'admin@gmail.com' });
 
   if (!adminExists) {
@@ -38,7 +38,7 @@ async function seed() {
   }
 
   // ─── Seed Books ──────────────────────────────────────
-  const bookRepo = dataSource.getRepository(Book);
+  const bookRepo = dataSource.getRepository(BookOrmEntity);
   const bookCount = await bookRepo.count();
 
   if (bookCount === 0) {
