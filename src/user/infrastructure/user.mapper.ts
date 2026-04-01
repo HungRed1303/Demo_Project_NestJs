@@ -11,6 +11,7 @@ export class UserMapper {
       role: orm.role,
       refreshToken: orm.refreshToken,
       refreshTokenExpiresAt: orm.refreshTokenExpiresAt,
+      updatedAt: orm.updatedAt,
       createdAt: orm.createdAt,
     });
   }
